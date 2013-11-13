@@ -28,7 +28,7 @@ Options:
                                    level value in percent. [default: %3.0f]
     -c --color                     Whether the output is colored.
     --strike                       Whether the output text is stricken through
-                                   when muted.
+                                   when muted. Disables any mute prefix.
     -m <prefix> --mute <prefix>    The output prefix for a muted sinks volume.
                                    [default: M]
 
@@ -119,10 +119,11 @@ def printvol(format_str="%3.0f", mute_prefix='M', sink=default_sink,
         (volume_max - volume_min) * 100
 
     text = format_str % percent
-    if strike and pa.get_mute(sink):
-        text = strikethrough(text)
-    elif not strike:
-        text = mute_prefix + text
+    if pa.get_mute(sink):
+        if strike:
+            text = strikethrough(text)
+        else:
+            text = mute_prefix + text
     if color:
         ct = ColorizedText()
         ct.append(color_gradient(percent / 100), text)
