@@ -3,6 +3,7 @@
 
 Usage:
     pavolume show
+    pavolume sinks
     pavolume printvol [-s <sink>] [-f <format>] [--color]
     pavolume volup [--nolimit] [--nounmute] [--noshow] [--quiet]
     pavolume voldown [--noshow] [--quiet]
@@ -94,6 +95,10 @@ def show():
     Notify.Notification.new(title, pb, "dialog-information").show()
 
 
+def sinks():
+    for sink in pa.get_sinks():
+        print(sink)
+
 
 def volume_set(new_volume, noshow=False, quiet=False):
     pa.set_volume(int(new_volume), default_sink)
@@ -128,6 +133,9 @@ if __name__ == "__main__":
 
     if args['show']:
         show()
+
+    elif args['sinks']:
+        sinks()
 
     elif args['volup']:
         if not args['--nounmute']:

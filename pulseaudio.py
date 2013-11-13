@@ -22,12 +22,14 @@ class PulseAudio(object):
             mute_match = PulseAudio.mute_re.match(line)
 
             if volume_match:
-                self._volume[volume_match.group(1)] = \
+                self._volume[volume_match.group(1).decode()] = \
                     int(volume_match.group(2), 16)
             elif mute_match:
-                self._mute[mute_match.group(1)] = \
+                self._mute[mute_match.group(1).decode()] = \
                     mute_match.group(2).lower() == b"yes"
 
+    def get_sinks(self):
+        return list(self._mute.keys())
 
     def get_mute(self, sink=None):
         if not sink:
