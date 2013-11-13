@@ -116,7 +116,6 @@ def printvol(format_str="%3.0f", sink=default_sink, color=False):
     text = format_str % percent
     if pa.get_mute(sink):
         text = strikethrough(text)
-    text = text + "%"
     if color:
         ct = ColorizedText()
         ct.append(color_gradient(percent / 100), text)
