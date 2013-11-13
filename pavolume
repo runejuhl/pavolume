@@ -4,7 +4,7 @@
 Usage:
     pavolume show
     pavolume sinks
-    pavolume printvol [-s <sink>] [-f <format>] [--color]
+    pavolume printvol [-s <sink>] [--strike] [-f <format>] [-c] [-m <prefix>]
     pavolume volup [--nolimit] [--nounmute] [--noshow] [--quiet]
     pavolume voldown [--noshow] [--quiet]
     pavolume volset <volume> [--nounmute] [--noshow] [--quiet]
@@ -26,7 +26,11 @@ Options:
                                    instead of the default sink.
     -f <format> --format <format>  A python format string for a single volume
                                    level value in percent. [default: %3.0f]
-    --color                        Whether the output is colored.
+    -c --color                     Whether the output is colored.
+    --strike                       Whether the output text is stricken through
+                                   when muted.
+    -m <prefix> --mute <prefix>    The output prefix for a muted sinks volume.
+                                   [default: M]
 
 """
 
@@ -109,13 +113,16 @@ def show():
     Notify.Notification.new(title, pb, "dialog-information").show()
 
 
-def printvol(format_str="%3.0f", sink=default_sink, color=False):
+def printvol(format_str="%3.0f", mute_prefix='M', sink=default_sink,
+             color=False, strike=False):
     percent = (pa.get_volume(sink) - volume_min) / \
         (volume_max - volume_min) * 100
 
     text = format_str % percent
-    if pa.get_mute(sink):
+    if strike and pa.get_mute(sink):
         text = strikethrough(text)
+    elif not strike:
+        text = mute_prefix + text
     if color:
         ct = ColorizedText()
         ct.append(color_gradient(percent / 100), text)
@@ -160,6 +167,8 @@ if __name__ == "__main__":
     pa = PulseAudio()
     pa.update()
 
+    sink = default_sink
+
     if not args['--sink'] is None:
         sink = args['--sink']
         if not sink in pa.get_sinks():
@@ -173,11 +182,8 @@ if __name__ == "__main__":
         sinks()
 
     elif args['printvol']:
-        if not args['--sink'] is None:
-            printvol(color=args['--color'], sink=args['--sink'],
-                     format_str=args['--format'])
-        else:
-            printvol(color=args['--color'], format_str=args['--format'])
+        printvol(color=args['--color'], sink=sink, mute_prefix=args['--mute'],
+                 format_str=args['--format'], strike=args['--strike'])
 
     elif args['volup']:
         if not args['--nounmute']:
