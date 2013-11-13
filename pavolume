@@ -22,6 +22,11 @@ Options:
     --nolimit                      Allow increasing the volume over 100%
     --nounmute                     Disable the default behavior of un-muting
                                    when increasing the volume
+    -s <sink> --sink <sink>        A sink to use with the specific command
+                                   instead of the default sink.
+    -f <format> --format <format>  A python format string for a single volume
+                                   level value in percent. [default: %3.0f]
+    --color                        Whether the output is colored.
 
 """
 
@@ -29,13 +34,22 @@ from pulseaudio import PulseAudio
 from docopt import docopt
 from configparser import SafeConfigParser
 from gi.repository import Notify
+from ColorizedText import get_linear_gradient_func as linear_gradient
+from ColorizedText import ColorizedText
+from colorsysplus import hex_to_rgb, rgb_to_hex
 import os
+import sys
 import math
 import subprocess
 
 square_full = "\u25a0"
 square_empty = "\u25a1"
 square_cross = "\u25a8"
+
+color_muted = "#FF0000"
+color_max = "#00FF00"
+color_gradient = linear_gradient((hex_to_rgb(color_muted),
+                                  hex_to_rgb(color_max)))
 
 
 def strikethrough(text):
@@ -95,6 +109,22 @@ def show():
     Notify.Notification.new(title, pb, "dialog-information").show()
 
 
+def printvol(format_str="%3.0f", sink=default_sink, color=False):
+    percent = (pa.get_volume(sink) - volume_min) / \
+        (volume_max - volume_min) * 100
+
+    text = format_str % percent
+    if pa.get_mute(sink):
+        text = strikethrough(text)
+    text = text + "%"
+    if color:
+        ct = ColorizedText()
+        ct.append(color_gradient(percent / 100), text)
+        print(ct.to_ansi())
+    else:
+        print(text)
+
+
 def sinks():
     for sink in pa.get_sinks():
         print(sink)
@@ -131,11 +161,24 @@ if __name__ == "__main__":
     pa = PulseAudio()
     pa.update()
 
+    if not args['--sink'] is None:
+        sink = args['--sink']
+        if not sink in pa.get_sinks():
+            print("No such sink: " + sink, file=sys.stderr)
+            sys.exit(1)
+
     if args['show']:
         show()
 
     elif args['sinks']:
         sinks()
+
+    elif args['printvol']:
+        if not args['--sink'] is None:
+            printvol(color=args['--color'], sink=args['--sink'],
+                     format_str=args['--format'])
+        else:
+            printvol(color=args['--color'], format_str=args['--format'])
 
     elif args['volup']:
         if not args['--nounmute']:
