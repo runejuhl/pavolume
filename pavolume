@@ -38,9 +38,14 @@ from pulseaudio import PulseAudio
 from docopt import docopt
 from configparser import SafeConfigParser
 from gi.repository import Notify
-from ColorizedText import get_linear_gradient_func as linear_gradient
-from ColorizedText import ColorizedText
-from colorsysplus import hex_to_rgb, rgb_to_hex
+try:
+    from ColorizedText import get_linear_gradient_func as linear_gradient
+    from ColorizedText import ColorizedText
+    from colorsysplus import hex_to_rgb
+except ImportError:
+    colorAvailable = False
+else:
+    colorAvailable = True
 import os
 import sys
 import math
@@ -52,8 +57,9 @@ square_cross = "\u25a8"
 
 color_muted = "#FF0000"
 color_max = "#00FF00"
-color_gradient = linear_gradient((hex_to_rgb(color_muted),
-                                  hex_to_rgb(color_max)))
+if colorAvailable:
+    color_gradient = linear_gradient((hex_to_rgb(color_muted),
+                                    hex_to_rgb(color_max)))
 
 
 def strikethrough(text):
@@ -176,14 +182,19 @@ if __name__ == "__main__":
             print("No such sink: " + sink, file=sys.stderr)
             sys.exit(1)
 
+    useColors = args['--color']
+    if useColors and not colorAvailable:
+        print("colorsysplus module not available, proceeding without color",
+                file=sys.stderr)
+        useColors = False
+
     if args['show']:
         show()
 
     elif args['sinks']:
         sinks()
-
     elif args['printvol']:
-        printvol(color=args['--color'], sink=sink, mute_prefix=args['--mute'],
+        printvol(color=useColors, sink=sink, mute_prefix=args['--mute'],
                  format_str=args['--format'], strike=args['--strike'])
 
     elif args['volup']:
