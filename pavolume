@@ -50,6 +50,7 @@ import os
 import sys
 import math
 import subprocess
+import appdirs
 
 square_full = "\u25a0"
 square_empty = "\u25a1"
@@ -90,7 +91,7 @@ scriptdir = os.path.dirname(os.path.realpath(__file__))
 # read config
 config = SafeConfigParser()
 config.read([os.path.join(scriptdir, "pavolume.conf"),
-             os.path.expanduser("$XDG_CONFIG_HOME/pavolume/pavolume.conf"),
+             os.path.join(appdirs.user_config_dir('pavolume'), "pavolume.conf"),
              "/etc/pavolume/pavolume.conf"])
 default_sink = config.get("Sink", "default_sink")
 if default_sink == "None":
