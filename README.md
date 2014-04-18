@@ -4,7 +4,9 @@ pavolume is a simple python PulseAudio volume control for the command line. It i
 
 # Usage
 
+	pavolume -help		   # show complete usage explanation
 	pavolume show              # show volume and mute status as notification
+	pavolume sinks             # show sinks from pulse audio
 	pavolume volup             # increase volume
 	pavolume voldown           # increase volume
 	pavolume volset 50%        # set volume to 50%
@@ -17,6 +19,7 @@ pavolume is a simple python PulseAudio volume control for the command line. It i
 You can use the <code>--quiet</code> switch to not play a blip sound and the <code>--noshow</code> switch to not show libnotify notifications. If you want to allow <code>volup</code> to go over 100%, you can use the <code>--nolimit</code> switch:
 
 	pavolume volup --nolimit   # turn it to 11!
+	
 
 # Installation
 Clone the git repo somewhere and put <code>pavolume</code> on your <code>$PATH</code>. The <code>pavolume.conf</code> can go in one of these places:
@@ -41,6 +44,8 @@ Pressing the volume up/down keys normally will increase/decrease volume, if you 
 
 If these bindings don't work for some reason, try calling the commands from the command line directly. If this works, then check whether the pavolume script is also visible from awesome's <code>$PATH</code>.
 
+
+
 # Dependencies
 
 * <code>pacmd</code>
@@ -48,6 +53,7 @@ If these bindings don't work for some reason, try calling the commands from the 
 	* <code>docopt</code>
 	* <code>pygobject</code>
 	* <code>appdirs</code>
+	* <code>colorsysplus</code> for the <code>--color</code> option
 
 # Questions, Comments, Code
 If you have questions or comments, drop me a mail on GitHub! Code contributions are always welcome, too!
