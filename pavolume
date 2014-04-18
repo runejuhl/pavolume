@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """pavolume - Control PulseAudio Volume from the commandline
 
 Usage:
@@ -38,13 +38,19 @@ from pulseaudio import PulseAudio
 from docopt import docopt
 from configparser import SafeConfigParser
 from gi.repository import Notify
-from ColorizedText import get_linear_gradient_func as linear_gradient
-from ColorizedText import ColorizedText
-from colorsysplus import hex_to_rgb, rgb_to_hex
+try:
+    from ColorizedText import get_linear_gradient_func as linear_gradient
+    from ColorizedText import ColorizedText
+    from colorsysplus import hex_to_rgb
+except ImportError:
+    colorAvailable = False
+else:
+    colorAvailable = True
 import os
 import sys
 import math
 import subprocess
+import appdirs
 
 square_full = "\u25a0"
 square_empty = "\u25a1"
@@ -52,8 +58,9 @@ square_cross = "\u25a8"
 
 color_muted = "#FF0000"
 color_max = "#00FF00"
-color_gradient = linear_gradient((hex_to_rgb(color_muted),
-                                  hex_to_rgb(color_max)))
+if colorAvailable:
+    color_gradient = linear_gradient((hex_to_rgb(color_muted),
+                                    hex_to_rgb(color_max)))
 
 
 def strikethrough(text):
@@ -84,7 +91,7 @@ scriptdir = os.path.dirname(os.path.realpath(__file__))
 # read config
 config = SafeConfigParser()
 config.read([os.path.join(scriptdir, "pavolume.conf"),
-             os.path.expanduser("$XDG_CONFIG_HOME/pavolume/pavolume.conf"),
+             os.path.join(appdirs.user_config_dir('pavolume'), "pavolume.conf"),
              "/etc/pavolume/pavolume.conf"])
 default_sink = config.get("Sink", "default_sink")
 if default_sink == "None":
@@ -92,7 +99,7 @@ if default_sink == "None":
 volume_max = int(config.get("Sink", "volume_max"))
 volume_min = int(config.get("Sink", "volume_min"))
 volume_increment = int(config.get("Sink", "volume_increment"))
-blip_sound = config.get("Sounds", "blip")
+blip_sound = os.path.expanduser(config.get("Sounds", "blip"))
 
 Notify.init("pavolume")
 
@@ -176,14 +183,19 @@ if __name__ == "__main__":
             print("No such sink: " + sink, file=sys.stderr)
             sys.exit(1)
 
+    useColors = args['--color']
+    if useColors and not colorAvailable:
+        print("colorsysplus module not available, proceeding without color",
+                file=sys.stderr)
+        useColors = False
+
     if args['show']:
         show()
 
     elif args['sinks']:
         sinks()
-
     elif args['printvol']:
-        printvol(color=args['--color'], sink=sink, mute_prefix=args['--mute'],
+        printvol(color=useColors, sink=sink, mute_prefix=args['--mute'],
                  format_str=args['--format'], strike=args['--strike'])
 
     elif args['volup']:

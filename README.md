@@ -47,6 +47,7 @@ If these bindings don't work for some reason, try calling the commands from the 
 * Python 3 with packages:
 	* <code>docopt</code>
 	* <code>pygobject</code>
+	* <code>appdirs</code>
 
 # Questions, Comments, Code
 If you have questions or comments, drop me a mail on GitHub! Code contributions are always welcome, too!
