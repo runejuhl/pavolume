@@ -98,7 +98,7 @@ if default_sink == "None":
 volume_max = int(config.get("Sink", "volume_max"))
 volume_min = int(config.get("Sink", "volume_min"))
 volume_increment = int(config.get("Sink", "volume_increment"))
-blip_sound = config.get("Sounds", "blip")
+blip_sound = os.path.expanduser(config.get("Sounds", "blip"))
 
 Notify.init("pavolume")
 
