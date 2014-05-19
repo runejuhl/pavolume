@@ -10,4 +10,4 @@ volume_increment = 10
 
 [Sounds]
 ## Blip sound for showing the current volume
-blip = /usr/share/sounds/ubuntu/stereo/message.ogg
+blip = message.ogg
